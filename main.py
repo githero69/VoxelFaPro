@@ -27,8 +27,7 @@ def to_int(arg):
 
 
 def remove_duplicates(lis):
-    new_list = []
-    new_list.append(lis[0])
+    new_list = [lis[0]]
     new_list_count = 0
 
     for i in range(len(lis)):
@@ -58,7 +57,7 @@ def calculate_height(current_step, component):
         new_height = old_height - diff
     else:
         new_height = old_height
-    return new_height
+    return new_height + 30
 
 
 # Key-Callbacks
@@ -148,10 +147,9 @@ def main():
     if not glfw.init():
         return
 
-    w_width, w_height = 1280, 720
-    aspect_ratio = w_width / w_height
+    aspect_ratio = WIDTH / HEIGHT
 
-    window = glfw.create_window(w_width, w_height, "My OpenGL window", None, None)
+    window = glfw.create_window(WIDTH, HEIGHT, "FRAESPROZESS", None, None)
 
     if not window:
         glfw.terminate()
@@ -259,13 +257,13 @@ def main():
     # instances
     instance_array = []
     offset = 1
-    for z in range(0, length, 1):
-        for y in range(0, height, 1):
-            for x in range(0, width, 1):
+    for length_index in range(0, length, 1):
+        for height_index in range(0, height, 1):
+            for width_index in range(0, width, 1):
                 translation = pyrr.Vector3([0.0, 0.0, 0.0])
-                translation.x = x + offset
-                translation.y = y + offset
-                translation.z = z + offset
+                translation.x = width_index + offset
+                translation.y = length_index + offset
+                translation.z = height_index + offset
                 instance_array.append(translation)
 
     instance_array = numpy.array(instance_array, numpy.float32)
@@ -289,7 +287,7 @@ def main():
     # model = matrix44.create_from_translation(Vector3([-14.0, -8.0, 0.0]))
     # view = matrix44.create_from_translation(Vector3([0.0, 0.0, -20.0]))
     projection = pyrr.matrix44.create_perspective_projection_matrix(45.0, aspect_ratio, 0.1, 300.0)
-    cube_pos = pyrr.matrix44.create_from_translation(pyrr.Vector3([-20.0, 0.0, -50.0]))
+    cube_pos = pyrr.matrix44.create_from_translation(pyrr.Vector3([-20.0, -60.0, 50.0]))
 
     # mv = matrix44.multiply(model, view)
     # mvp = matrix44.multiply(mv, projection)
@@ -317,19 +315,19 @@ def main():
         view = cam.get_view_matrix()
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, view)
 
-        height = calculate_height(steps[index], component)
+        step_height = calculate_height(steps[index], component)
         for i in range(new_points[0].y):
-            component.remove_circle(steps[index].x, steps[index].y, new_points[i].x, new_points[i].y, height)
+            component.remove_circle(steps[index].x, steps[index].y, new_points[i].x, new_points[i].y, step_height)
 
         for outer in range(width):
             for inner in range(length):
                 heights.append((component.array[inner][outer], inner, outer))
         for runner in range(0, len(heights), 1):
             if heights[runner][0] < 30:
-                a = heights[runner][0]
-                b = heights[runner][1]
-                c = heights[runner][2]
-                for a in range(a, 30*70, 70):
+                a = heights[runner][0]  # hoehe
+                b = heights[runner][1]  # x - coord
+                c = heights[runner][2]  # y - coord
+                for a in range(a, a * 70, 70):
                     d = a + b + c * 2100
                     if d < 146999:
                         instance_array[d] = None
